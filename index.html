@@ -311,6 +311,7 @@ $view = View::forge('car_template.jade');
 
 // using nested partial views
 $partial = View::forge('partials/car.jade');
+
 $page    = View::forge('page_template.jade');
 $page->set_safe('content', $partial);
 ```
@@ -338,8 +339,8 @@ $page->set_safe('content', $partial);
 ```php
 class Controller_Car extends Controller
 {
-    // url: site/car/view/10
-    public function action_view($car_id)
+    // url: site/car/view
+    public function action_view()
     {
         // find car
         // display car
@@ -433,7 +434,7 @@ class Controller_Car extends Controller
 
                 <section data-markdown>
                     <script type="text/template">
-                    # Directory Structures
+                    # Directories
 
                     FuelPHP uses controller directories for routing.
 
@@ -449,7 +450,7 @@ class Controller_Car extends Controller
 ```php
 class Controller_Api_Car extends Controller
 {
-    // site.com/car/api/sell
+    // site.com/api/car/sell
     public function action_sell(){}
 }
 ```
