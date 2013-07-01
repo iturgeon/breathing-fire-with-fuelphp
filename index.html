@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>Breathing fire with FuelPHP</title>
+
+        <meta name="description" content="A quick presentation slideshow of the best parts of this awesome new framework">
+        <meta name="author" content="Hakim El Hattab">
+
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <link rel="stylesheet" href="css/reveal.min.css">
+        <link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+        <!-- For syntax highlighting -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
+
+        <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+        <script>
+            document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+        </script>
+
+        <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+    </head>
+
+    <body>
+
+    <div class="reveal">
+        <div class="slides">
+            <section data-markdown data-background="img/fuelphp-bg.png">
+                <script type="text/template">
+                    # Breathing fire with FuelPHP
+
+                    PHP is getting Awesome.
+                </script>
+            </section>
+
+            <section data-markdown>
+                <script type="text/template">
+                    # The guy talking
+
+``` basic
+10 PRINT "This RULES!"
+20 GOTO 10
+```
+
+                    * It all started with Basic *(in highschool)*
+                    * Learned PHP *myself* to build automotive sites
+                    * Digital Media & CS from UCF
+                    * Lead a **rad** team at [The Center for Distributed Learning](http://online.ucf.edu/)
+                    * Build stuff like: [Obojobo](http://obojobo.ucf.edu), [Materia](http://materia.ucf.edu), and [HowTune](http://howtune.com)
+
+                    <br/>
+                    ## <span style="color:#999;">In one word:</span> Inspired.
+                    <small>more? [ianturgeon.com](http://ianturgeon.com)</small>
+
+                </script>
+            </section>
+
+            <section data-markdown>
+                <script type="text/template">
+                    # Modern PHP
+
+                    FuelPHP **requires** PHP 5.3
+
+                    * Object oriented everything
+                    * Heavy use of Namespaces
+                    * No PEAR (gross), more Composer (yay)
+                    * Templates are better with short tags <?= $user ?>
+                    * PHP 5.4 has a built in server!
+
+                </script>
+            </section>
+
+            <section data-markdown>
+                <script type="text/template">
+                    # The Good Parts
+
+                    * Hierarchical MVC
+                    * Understandable request routing.
+                    * Active Record ORM.
+                    * RESTful Controllers.
+                    * Command line utility that will perform Magic.
+                </script>
+            </section>
+
+            <section data-markdown>
+                <script type="text/template">
+                    # Hierarchial Model View Controller
+
+                    * MVC. a popular design pattern
+                    * Seperate logic, data, and display.
+                    * Hierarchical design lets you extend everything.
+                    * FuelPHP adds ViewModels; Remove view logic from your controller.
+                </script>
+            </section>
+
+
+            <section>
+                <section data-markdown>
+                    <script type="text/template">
+                        # Models
+
+                        ### Model your data in Object Oriented Form.
+
+                        * Models handle data, and interaction with that data
+                        * True Active Record implementation (from Rails)
+                        * Define relationships between models
+                        * Bypass the magic any time, build queries manually.
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Models
+
+                        ## A Basic Model Class
+```php
+class Model_Car extends \Orm\Model
+{
+    protected static $_properties = [
+        'make',
+        'model',
+        'year',
+        'created_at',
+        'updated_at'
+    ];
+
+    public function get_name()
+    {
+        return "{$this->year} {$this->make} {$this->model}";
+    }
+}
+```
+                        <small>fuel/app/classes/model/car.php</small>
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Finding Models
+
+```php
+// find one by id
+Model_Car::find(1);
+
+// find all my make
+$cars = Model_Car::find()->where('make', 'Scion')->get();
+
+// find one my make
+$one_car = Model_Car::find()->where('make', 'Scion')->get_one();
+
+// fall back to a database query
+$cars = DB::select()
+    ->from('cars')
+    ->where('make', 'Scion')
+    ->as_object('Model_Car')
+    ->execute();
+```
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Relating Models
+```php
+class Model_User extends \Orm\Model
+{
+    protected static $_belongs_to = [
+        'car'
+    ];
+}
+```
+```php
+class Model_Car extends \Orm\Model
+{
+    protected static $_has_one = [
+        'user'
+    ];
+}
+```
+```php
+$car = Model_Car::find(1);
+$car->user
+```
+User is automatically retrieved from the database!
+
+                    </script>
+                </section>
+
+
+            </section>
+
+            <section>
+                <section data-markdown>
+                    <script type="text/template">
+                        # Views
+
+                        * Think of it as presentation **filter**.
+                        * Used to display models.
+                        * No application logic. **None**.
+                        * Can be an entire web page
+                        * Or just partials of a page
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    <h1>Example View</h1>
+```
+<!doctype html>
+<html>
+    <head>
+        <title><?php echo $car_name; ?></title>
+    <head>
+    <body>
+        <h1>Displaying: <?php echo $car_name; ?></h1>
+    </body>
+</html>
+```
+                    <small>fuel/app/views/car_template.php</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Tons of Options
+                        Support for many template engines using Parser package.
+
+                        * Dwoo
+                        * Haml
+                        * Jade
+                        * Markdown
+                        * Mustache
+                        * Simpletags
+                        * Smarty
+                        * Twig
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Mustache Views
+```
+<!doctype html>
+<html>
+    <head>
+        <title>{{car_name}}</title>
+    <head
+    <body>
+        <h1>Displaying: {{car_name}}</h1>
+    </body>
+</html>
+```
+                    <small>fuel/app/views/car_template.mustache</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Jade Views
+```jade
+!!!5
+html
+    head
+        title {{ $car_name }} Detailst;
+    body
+        h1 Displaying: {{ $car_name }}
+```
+
+                    <small>fuel/app/views/car_template.jade</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    <h1>Using a View</h1>
+                    passing variables to the view
+```php
+$data = array();
+
+$data['car_name'] = $car_name;
+
+$view = View::forge('car_template', $data);
+```
+
+                    <small>(this happens in a controller)</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Using a view
+                    more complex options
+```php
+// using set
+$view = View::forge('car_template');
+$view->set('car_name', $car->name);
+
+// using Jade
+$view = View::forge('car_template.jade');
+
+// using nested partial views
+$partial = View::forge('partials/car.jade');
+$page    = View::forge('page_template.jade');
+$page->set_safe('content', $partial);
+```
+                    <small>* View::set() scrubs html entities, set_safe() bypasses this security filter</small>
+                    </script>
+                </section>
+
+            </section>
+
+            <section>
+                <section data-markdown>
+                    <script type="text/template">
+                        # Controllers
+
+                        * The link betwen users and the system
+                        * Controllers respond to requests (accepting input)
+                        * They orchistrate actions upon the models
+                        * Then they arrange views
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Basic Controllers
+```php
+class Controller_Car extends Controller
+{
+    // url: site/car/view/10
+    public function action_view($car_id)
+    {
+        // find car
+        // display car
+    }
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+                    </script>
+                </section>
+                <section data-markdown>
+                    <script type="text/template">
+                    # Template Controllers
+```php
+class Controller_Car extends Controller_Template
+{
+    // set template to fuel/app/views/car_template.php
+    public $template = 'car_template';
+
+    public function action_view($car_id)
+    {
+        // find car
+        $this->template->car_name = $car->name;
+    }
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+                    </script>
+                </section>
+                <section data-markdown>
+                    <script type="text/template">
+                    # Rest Controllers
+```php
+class Controller_Car extends Controller_Rest
+{
+    // request: GET site/car/single/1
+    public function get_single($id)
+    {
+        // find car
+        return $car;
+    }
+
+    // request: POST site/car/single
+    public function post_single()
+    {
+        // get the POSTed car data
+        // save the car
+        return $car;
+    }
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+                    </script>
+                </section>
+
+            </section>
+
+            <section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Routing
+
+                        * How FuelPHP responds to user requests
+                        * Works automatically w/ Built in Auto-Magic
+                        * Use regex for **Very Flexible** url matching.
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Auto-Magical Routing
+
+                    All public actions are accessible.
+
+```php
+class Controller_Car extends Controller
+{
+    // http://site.com/car
+    public function action_index(){}
+
+    // http://site.com/car/view
+    public function action_view(){}
+
+    // http://site.com/car/edit
+    public function action_edit(){}
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Directory Structures
+
+                    FuelPHP uses controller directories for routing.
+
+```php
+class Controller_Car extends Controller
+{
+    // site.com/car/sell
+    public function action_sell(){}
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+
+```php
+class Controller_Api_Car extends Controller
+{
+    // site.com/car/api/sell
+    public function action_sell(){}
+}
+```
+                    <small>fuel/app/classes/controller/api/car.php</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Passing a Variable
+
+                    Auto-magic supports a single argument.
+
+```php
+class Controller_Car extends Controller
+{
+    // site.com/car/view/1
+    public function action_view($car_id){}
+
+    // site.com/car/edit/4
+    public function action_edit($car_id){}
+}
+```
+                    <small>fuel/app/classes/controller/car.php</small>
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                    # Advanced Routing
+
+                    Override defaults and respond to complex requests
+
+```php
+return [
+    '_root_' => 'site/index',  // The default route
+    '_404_'  => 'site/404',    // The main 404 route
+
+    // From: http://site.com/vehicles/4/like
+    // To:   Controller_Cars::action_like($car_id)
+    // $car_id is "4"
+    'vehicles/:car_id/like'       => 'cars/like/$1',
+
+    // From: http://site.com/vehicles/10/photos/20
+    // To:   Controller_Photos::action_view($car_id, $photo_id)
+    // $car_id is "10" and $photo_id is "20"
+    'vehicles/:car_id/photos/:id' => 'photos/view/$1$2'
+
+];
+```
+                    <small>fuel/app/config/routes.php</small>
+                    </script>
+                </section>
+
+            </section>
+
+            <section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Oil
+
+                        ## <span style="color:rgb(115, 100,125);">Generate</span> builds code
+                        ## <span style="color:rgb(115, 100,125);">Refine</span> executes code
+
+                        A **command line** utility that writes and execute code.
+```bash
+$ php oil refine migrate
+$ php oil r migrate
+$ php oil generate model car name:string
+$ php oil g model car name:string
+```
+                    </script>
+
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Migrations
+                        ## Build and execute database changes
+
+```bash
+$ php oil refine migrate
+```
+
+                        Oil will figure out which migration you are currently on, and run any newer ones.
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Generate Everything
+                        ## Scaffolding
+```bash
+$ php oil generate scaffold car name:string make:string model:string
+```
+                        ### Instantly builds:
+                        1. **Model**: app/classes/model/car.php
+                        2. **Migration**: app/migration/001_create_car.php
+                        3. **Controller**: app/classes/controller/car.php
+                        4. **5 Views**: app/views/cars/index, view, create, edit, _form
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # One Part at a Time
+                        ## Generate
+
+```bash
+$ php oil g model cars make:string model:string
+$ php oil g controller cars
+$ php oil g migration rename_table_cars_to_vehicles
+$ php oil g task mytask
+$ php oil g config mypackage
+```
+                    </script>
+                </section>
+
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Run Tasks
+                        ## Maintinance and Installation
+
+```bash
+$ php oil r install
+$ php oil r admin:create_user iturgeon ian turgeon iturgeon@gmail.com
+$ php oil r cars:delete_car 4
+```
+                    </script>
+                </section>
+
+            </section>
+
+            <section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Pro Tips
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Learn The Documentation
+
+                        [docs.fuelphp.com](http://docs.fuelphp.com)
+                        
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Filenames Matter
+
+```
+// classes/controller/cars.php
+class Controller_Cars {}
+
+// classes/controller/assets/cars.php
+class Controller_Assets_Cars {}
+
+// classes/model/cars.php
+class Model_Cars {}
+```
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Configuration
+
+                        Environment configs let you change options.
+```php
+'base_url'  => 'http://site.com',
+```
+<small>config/my_config.php</small>
+```php
+'base_url'  => 'http://dev.site.com',
+```
+                        <small>config/development/my_config.php</small>
+                        
+                        Environments: development, production, staging, and test
+                    </script>
+                </section>
+
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Migration Status
+
+                        ### Migration status is kept in **2** places.
+
+                        * **The Database** (table: *migration*).
+                        * **Environment Config** (*config/development/migration.php*)
+
+                        <br>
+                        When moving and re-installing your app, migrations can get confused.  Do not move or commit your migration config.
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # ORM Relationships
+
+                        ## Here are the rules:
+
+                        * **Belongs To**: *has primary key from other table*
+                        * **Has One**: *other table has my primary key*
+                        * **Has many**: *many in other table have my primary key*
+                        * **Many to Many**: *a relational table holds both primary keys*
+
+                        <br>
+                        Never rely on the english, it can be thought of in either direction.
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # PHP Method Chaining
+```php
+Model_Car::find(1)
+    ->set('make', 'Scion')
+    ->set('model', 'FR-S')
+    ->save();
+
+View::forge('template')
+    ->set('title', 'Vehicle Name')
+    ->set('content', View::forge('partials/car')
+        ->set('car', Model_Car::find(1)
+    )
+);
+```
+                    </script>
+                </section>
+
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Use Query Builder
+
+                        Abstracts your database calls, and scrubs your input.
+```php
+DB::select()
+    ->from('cars')
+    ->join('owners')
+        ->on('cars.id', '=', 'owners.car_id')
+    ->where('make', $make_search)
+    ->order_by('make')
+    ->execute();
+```
+
+                    </script>
+                </section>
+
+                <section data-markdown>
+                    <script type="text/template">
+                        # Short Tags
+                        ## Minimize your templates
+
+```
+<!doctype html>
+<html>
+    <head>
+        <title><?php echo $car_name; ?></title>
+        <title><?= $car_name ?></title>
+    <head>
+    <body>
+        <h1>Displaying: <?php echo $car_name; ?></h1>
+        <h1>Displaying: <?= $car_name ?></h1>
+    </body>
+</html>
+```
+
+Short tags are on by default in php 5.4
+                    </script>
+                </section>
+
+            </section>
+
+            <section data-markdown >
+                <script type="text/template">
+                    PHP **IS** Getting Awesome.
+
+                    <small>[FuelPHP Crash Course](http://ucf.github.io/fuelphp-crash-course/)</small>
+                </script>
+            </section>
+        </div>
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+    <script type="text/javascript">
+    Reveal.initialize({
+
+        // Display controls in the bottom right corner
+        controls: true,
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Vertical centering of slides
+        center: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // Apply a 3D roll to links on hover
+        rollingLinks: true,
+
+        // Transition style
+        transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+
+        // Transition style for full page backgrounds
+        backgroundTransition: 'slide', // default/linear
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            // { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+            { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+            { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+            // { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+            // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
+            { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+
+    });
+    </script>
+
+    </body>
+</html>
