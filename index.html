@@ -153,10 +153,10 @@ class Model_Car extends \Orm\Model
 Model_Car::find(1);
 
 // find all my make
-$cars = Model_Car::find()->where('make', 'Scion')->get();
+$cars = Model_Car::query()->where('make', 'Scion')->get();
 
 // find one my make
-$one_car = Model_Car::find()->where('make', 'Scion')->get_one();
+$one_car = Model_Car::query()->where('make', 'Scion')->get_one();
 
 // fall back to a database query
 $cars = DB::select()
@@ -801,10 +801,10 @@ Short tags are on by default in php 5.4
             { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
             { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
             { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
-            { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+            // { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
             // { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
             // { src: 'plugin/search/search.js', async: true, condition: function() { return !!document.body.classList; } }
-            { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } }
+            { src: 'plugin/remotes/remotes.js', async: true, condition: function() { return !!document.body.classList; } },
         ]
 
     });
